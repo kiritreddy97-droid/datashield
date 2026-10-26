@@ -11,7 +11,16 @@ services:
     build: .
     environment:
       DATABASE_URL: postgresql://app:app@db:5432/app
+      # Dev-only: codes are printed in `docker compose logs api`. Never use console OTP in production.
+      OTP_SENDER: console
     ports: ["8000:8000"]
     depends_on: [db]
+  worker:
+    build: .
+    command: python -m app.worker --loop 3600
+    environment:
+      DATABASE_URL: postgresql://app:app@db:5432/app
+      REMOVAL_SENDER: fake
+    depends_on: [api]
 volumes:
   pgdata:

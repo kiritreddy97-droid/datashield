@@ -24,3 +24,14 @@
 
 ## API
 Run the backend and open `/docs` for the generated OpenAPI documentation.
+
+| Route | Purpose |
+|---|---|
+| `POST /auth/otp/request`, `POST /auth/otp/verify` | OTP login (email or Indian mobile); returns a JWT |
+| `GET/PATCH /me`, `DELETE /me` | Profile; "delete my data" |
+| `POST /me/contacts/otp`, `POST /me/contacts/verify` | Prove ownership of another phone/email |
+| `POST/DELETE /me/scan-consent`, `POST /me/scan`, `GET /me/findings` | Scan consent, scan, list findings |
+| `POST/DELETE /findings/{id}/consent`, `POST /findings/{id}/remove` | Per-listing consent; queue a removal letter |
+| `GET /me/audit` | The user's own consent and action history |
+
+All routes except `/health` and `/auth/*` require `Authorization: Bearer <token>` and only ever touch the caller's own data.

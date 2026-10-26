@@ -67,5 +67,5 @@ jobs:
       - name: Container migrates and serves
         run: |
           docker run -d --name api -p 8000:8000 app
-          curl --retry 15 --retry-connrefused --retry-delay 2 -fsS http://localhost:8000/health
+          curl --retry 20 --retry-all-errors --retry-delay 2 -fsS http://localhost:8000/health || { docker logs api; exit 1; }
           docker logs api | tail -5

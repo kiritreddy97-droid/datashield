@@ -18,9 +18,54 @@ jobs:
       - run: ruff check backend
       - run: pytest
         working-directory: backend
+
+  postgres:
+    # Migrations are the only way the schema is created in production, so test them (and the app) on real Postgres.
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ds_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGPASSWORD: postgres
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ds_migrate
+      MIGRATION_TEST_URL: postgresql+psycopg://postgres:postgres@localhost:5432/ds_migrate
+      TEST_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/ds_test
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - run: pip install -r requirements-dev.txt
+      - run: psql -h localhost -U postgres -c "create database ds_migrate"
+      - name: Migrations apply, match the models, and roll back
+        run: |
+          alembic upgrade head
+          alembic check
+          alembic downgrade base
+          alembic upgrade head
+      - name: Full test suite on Postgres
+        run: pytest
+
   docker:
     runs-on: ubuntu-latest
     needs: test
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t app .
+      - name: Container migrates and serves
+        run: |
+          docker run -d --name api -p 8000:8000 app
+          curl --retry 20 --retry-all-errors --retry-delay 2 -fsS http://localhost:8000/health || { docker logs api; exit 1; }
+          docker logs api | tail -5

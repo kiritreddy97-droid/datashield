@@ -7,7 +7,7 @@
 
 ## Phase 1 - MVP (weeks 5-10)
 - Consent, scan, findings and removal flows (this repo's backend)
-- OTP verification of identifiers
+- OTP verification of identifiers (done in the backend; SMS provider pending)
 - 3-5 source scanners
 
 ## Phase 2 - Monitor (months 3-6)

@@ -1,0 +1,15 @@
+[
+  {
+    "match": {"email": "asha@example.com"},
+    "source": "Example Directory (fictional)",
+    "url": "https://directory.example.invalid/people/asha",
+    "data_types": ["email", "phone"],
+    "contact_email": "grievance@directory.example.invalid"
+  },
+  {
+    "match": {"phone": "+91 90000 00001"},
+    "source": "Example Listings (fictional)",
+    "url": "https://listings.example.invalid/u/9000000001",
+    "data_types": ["phone"]
+  }
+]
